@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Ticket, CreateTicketData, UpdateTicketData, TicketComment } from "@/types";
 
@@ -95,28 +94,27 @@ export const deleteTicket = async (id: string): Promise<void> => {
 // Функция для отправки ответа в Telegram
 export const sendTelegramReply = async (ticketId: string, message: string): Promise<void> => {
   try {
-    // Получаем информацию о чате для этого тикета
-    const { data: chatInfo, error: chatError } = await supabase
-      .from('telegram_chats')
-      .select('chat_id')
-      .eq('ticket_id', ticketId)
-      .maybeSingle();
+    // Используем прямой запрос к базе данных для получения chat_id
+    const { data: result, error } = await supabase
+      .rpc('get_telegram_chat_by_ticket', { ticket_id: ticketId });
 
-    if (chatError || !chatInfo) {
-      console.error('Chat info not found for ticket:', ticketId);
+    if (error || !result || result.length === 0) {
+      console.error('Chat info not found for ticket:', ticketId, error);
       return;
     }
 
+    const chatInfo = result[0];
+
     // Отправляем сообщение через Edge Function
-    const { error } = await supabase.functions.invoke('send-telegram-message', {
+    const { error: sendError } = await supabase.functions.invoke('send-telegram-message', {
       body: {
         chatId: chatInfo.chat_id,
         message: message
       }
     });
 
-    if (error) {
-      console.error('Error sending Telegram message:', error);
+    if (sendError) {
+      console.error('Error sending Telegram message:', sendError);
       throw new Error('Не удалось отправить сообщение в Telegram');
     }
   } catch (error: any) {
