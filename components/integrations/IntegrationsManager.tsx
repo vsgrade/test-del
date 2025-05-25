@@ -52,12 +52,13 @@ const IntegrationsManager = () => {
           }
         ]);
       } else {
-        // Преобразуем данные из базы к нашему формату
+        // Преобразуем данные из базы к нашему формату, проверяя тип config
         const transformedIntegrations: Integration[] = (data || []).map(integration => ({
           id: integration.id,
           name: integration.name,
           type: integration.type as any,
-          config: integration.config,
+          config: typeof integration.config === 'object' && integration.config !== null ? 
+            integration.config as Record<string, any> : {},
           is_active: integration.is_active,
           user_id: user.id,
           department_id: integration.department_id,
