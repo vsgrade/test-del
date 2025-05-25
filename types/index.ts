@@ -1,5 +1,5 @@
 
-export type TicketStatus = 'new' | 'open' | 'pending' | 'solved' | 'closed';
+export type TicketStatus = 'new' | 'open' | 'in_progress' | 'waiting_customer' | 'waiting_internal' | 'resolved' | 'closed' | 'reopened';
 export type TicketPriority = 'low' | 'medium' | 'high' | 'critical';
 export type TicketChannel = 'web' | 'email' | 'phone' | 'telegram' | 'whatsapp' | 'vk';
 export type UserRole = 'admin' | 'manager' | 'support_agent' | 'sales_agent' | 'read_only';
@@ -9,9 +9,12 @@ export type DealStage = 'lead' | 'qualified' | 'proposal' | 'negotiation' | 'clo
 export const TicketStatusEnum = {
   NEW: 'new' as const,
   OPEN: 'open' as const,
-  PENDING: 'pending' as const,
-  SOLVED: 'solved' as const,
+  IN_PROGRESS: 'in_progress' as const,
+  WAITING_CUSTOMER: 'waiting_customer' as const,
+  WAITING_INTERNAL: 'waiting_internal' as const,
+  RESOLVED: 'resolved' as const,
   CLOSED: 'closed' as const,
+  REOPENED: 'reopened' as const,
 } as const;
 
 export const TicketPriorityEnum = {
@@ -36,6 +39,15 @@ export const UserRoleEnum = {
   SUPPORT_AGENT: 'support_agent' as const,
   SALES_AGENT: 'sales_agent' as const,
   READ_ONLY: 'read_only' as const,
+} as const;
+
+export const DealStageEnum = {
+  LEAD: 'lead' as const,
+  QUALIFIED: 'qualified' as const,
+  PROPOSAL: 'proposal' as const,
+  NEGOTIATION: 'negotiation' as const,
+  CLOSED_WON: 'closed_won' as const,
+  CLOSED_LOST: 'closed_lost' as const,
 } as const;
 
 export interface Ticket {

@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Ticket, CreateTicketData, UpdateTicketData, TicketComment } from "@/types";
 
@@ -64,14 +63,9 @@ export const getTicketById = async (id: string): Promise<Ticket | null> => {
 
 // Функция для обновления тикета
 export const updateTicket = async (id: string, updates: UpdateTicketData): Promise<Ticket> => {
-  const updateData: any = {
-    ...updates,
-    updated_at: new Date().toISOString()
-  };
-
   const { data, error } = await supabase
     .from('tickets')
-    .update(updateData)
+    .update(updates)
     .eq('id', id)
     .select()
     .single();
@@ -102,10 +96,7 @@ export const sendTelegramReply = async (ticketId: string, message: string): Prom
   try {
     // Получаем информацию о чате для этого тикета
     const { data: chatInfo, error: chatError } = await supabase
-      .from('telegram_chats')
-      .select('chat_id')
-      .eq('ticket_id', ticketId)
-      .single();
+      .rpc('get_telegram_chat_by_ticket', { ticket_id: ticketId });
 
     if (chatError || !chatInfo) {
       console.error('Chat info not found for ticket:', ticketId);
