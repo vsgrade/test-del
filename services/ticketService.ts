@@ -94,16 +94,17 @@ export const deleteTicket = async (id: string): Promise<void> => {
 // Функция для отправки ответа в Telegram
 export const sendTelegramReply = async (ticketId: string, message: string): Promise<void> => {
   try {
-    // Используем прямой запрос к базе данных для получения chat_id
-    const { data: result, error } = await supabase
-      .rpc('get_telegram_chat_by_ticket', { ticket_id: ticketId });
+    // Получаем информацию о чате для этого тикета
+    const { data: chatInfo, error: chatError } = await supabase
+      .from('telegram_chats')
+      .select('chat_id')
+      .eq('ticket_id', ticketId)
+      .maybeSingle();
 
-    if (error || !result || result.length === 0) {
-      console.error('Chat info not found for ticket:', ticketId, error);
+    if (chatError || !chatInfo) {
+      console.error('Chat info not found for ticket:', ticketId, chatError);
       return;
     }
-
-    const chatInfo = result[0];
 
     // Отправляем сообщение через Edge Function
     const { error: sendError } = await supabase.functions.invoke('send-telegram-message', {
