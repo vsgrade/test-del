@@ -41,7 +41,6 @@ const TicketForm = ({ onTicketCreated, initialData, isEditing = false, onCancel 
         priority: formData.priority,
         channel: formData.channel,
         tags: formData.tags.split(",").map(tag => tag.trim()).filter(Boolean),
-        updated_at: new Date().toISOString(),
       };
 
       if (isEditing && initialData?.id) {
@@ -134,9 +133,12 @@ const TicketForm = ({ onTicketCreated, initialData, isEditing = false, onCancel 
                 <SelectContent>
                   <SelectItem value={TicketStatusEnum.NEW}>Новый</SelectItem>
                   <SelectItem value={TicketStatusEnum.OPEN}>Открыт</SelectItem>
-                  <SelectItem value={TicketStatusEnum.PENDING}>Ожидание</SelectItem>
-                  <SelectItem value={TicketStatusEnum.SOLVED}>Решен</SelectItem>
+                  <SelectItem value={TicketStatusEnum.IN_PROGRESS}>В работе</SelectItem>
+                  <SelectItem value={TicketStatusEnum.WAITING_CUSTOMER}>Ожидание клиента</SelectItem>
+                  <SelectItem value={TicketStatusEnum.WAITING_INTERNAL}>Внутреннее ожидание</SelectItem>
+                  <SelectItem value={TicketStatusEnum.RESOLVED}>Решен</SelectItem>
                   <SelectItem value={TicketStatusEnum.CLOSED}>Закрыт</SelectItem>
+                  <SelectItem value={TicketStatusEnum.REOPENED}>Переоткрыт</SelectItem>
                 </SelectContent>
               </Select>
             </div>

@@ -86,7 +86,7 @@ const InitializationChecker = ({ children }: InitializationCheckerProps) => {
       
       for (const table of tables) {
         try {
-          const { error } = await supabase.from(table).select('id').limit(1);
+          const { error } = await supabase.from(table as any).select('id').limit(1);
           
           if (error && error.code === 'PGRST116') {
             // Таблица не существует
