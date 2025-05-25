@@ -33,17 +33,17 @@ const CalendarEventForm = ({ onEventCreated }: CalendarEventFormProps) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Не авторизован");
 
-      // Используем RPC функцию для создания события
-      const { error } = await supabase.rpc('create_calendar_event', {
-        event_title: formData.title,
-        event_description: formData.description,
-        event_start_date: formData.start_date,
-        event_end_date: formData.end_date,
-        event_all_day: formData.all_day,
-        event_location: formData.location,
-        event_reminder_minutes: formData.reminder_minutes,
-        event_user_id: user.id
-      });
+      // Создаем событие напрямую в таблице
+      const { error } = await supabase
+        .from('calendar_events')
+        .insert({
+          title: formData.title,
+          description: formData.description,
+          start_time: formData.start_date,
+          end_time: formData.end_date,
+          type: formData.all_day ? 'all_day' : 'meeting',
+          created_by: user.id
+        });
 
       if (error) throw error;
 
@@ -68,7 +68,7 @@ const CalendarEventForm = ({ onEventCreated }: CalendarEventFormProps) => {
       toast({
         variant: "destructive",
         title: "Ошибка",
-        description: "Не удалось создать событие. Функция будет доступна после настройки базы данных.",
+        description: "Не удалось создать событие",
       });
     } finally {
       setIsLoading(false);

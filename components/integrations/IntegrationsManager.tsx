@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,10 +20,11 @@ const IntegrationsManager = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Используем RPC функцию для получения интеграций
-      const { data, error } = await supabase.rpc('get_user_integrations', {
-        user_id_param: user.id
-      });
+      // Получаем интеграции напрямую из таблицы
+      const { data, error } = await supabase
+        .from('department_integrations')
+        .select('*')
+        .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error fetching integrations:', error);
@@ -52,7 +52,19 @@ const IntegrationsManager = () => {
           }
         ]);
       } else {
-        setIntegrations(data || []);
+        // Преобразуем данные из базы к нашему формату
+        const transformedIntegrations: Integration[] = (data || []).map(integration => ({
+          id: integration.id,
+          name: integration.name,
+          type: integration.type as any,
+          config: integration.config,
+          is_active: integration.is_active,
+          user_id: user.id,
+          department_id: integration.department_id,
+          created_at: integration.created_at,
+          updated_at: integration.updated_at
+        }));
+        setIntegrations(transformedIntegrations);
       }
     } catch (error: any) {
       console.error('Error:', error);
@@ -77,10 +89,10 @@ const IntegrationsManager = () => {
 
   const toggleIntegration = async (id: string, isActive: boolean) => {
     try {
-      const { error } = await supabase.rpc('toggle_integration', {
-        integration_id: id,
-        new_status: !isActive
-      });
+      const { error } = await supabase
+        .from('department_integrations')
+        .update({ is_active: !isActive })
+        .eq('id', id);
 
       if (error) throw error;
 
@@ -102,9 +114,10 @@ const IntegrationsManager = () => {
 
   const deleteIntegration = async (id: string) => {
     try {
-      const { error } = await supabase.rpc('delete_integration', {
-        integration_id: id
-      });
+      const { error } = await supabase
+        .from('department_integrations')
+        .delete()
+        .eq('id', id);
 
       if (error) throw error;
 

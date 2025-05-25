@@ -23,10 +23,11 @@ const CalendarComponent = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Используем raw SQL для запроса новой таблицы
-      const { data, error } = await supabase.rpc('get_calendar_events', {
-        user_id_param: user.id
-      });
+      // Получаем события напрямую из таблицы
+      const { data, error } = await supabase
+        .from('calendar_events')
+        .select('*')
+        .order('start_time', { ascending: true });
 
       if (error) {
         console.error('Error fetching calendar events:', error);
@@ -46,7 +47,20 @@ const CalendarComponent = () => {
           }
         ]);
       } else {
-        setEvents(data || []);
+        // Преобразуем данные из базы к нашему формату
+        const transformedEvents: CalendarEvent[] = (data || []).map(event => ({
+          id: event.id,
+          title: event.title,
+          description: event.description,
+          start_date: event.start_time,
+          end_date: event.end_time,
+          all_day: event.type === 'all_day',
+          location: '',
+          user_id: event.created_by || user.id,
+          created_at: event.created_at,
+          updated_at: event.updated_at
+        }));
+        setEvents(transformedEvents);
       }
     } catch (error: any) {
       console.error('Error:', error);

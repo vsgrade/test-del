@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,13 +36,15 @@ const IntegrationForm = ({ onIntegrationCreated, onCancel }: IntegrationFormProp
         config = {};
       }
 
-      // Используем RPC функцию для создания интеграции
-      const { error } = await supabase.rpc('create_integration', {
-        integration_name: formData.name,
-        integration_type: formData.type,
-        integration_config: config,
-        integration_user_id: user.id
-      });
+      // Создаем интеграцию напрямую в таблице
+      const { error } = await supabase
+        .from('department_integrations')
+        .insert({
+          name: formData.name,
+          type: formData.type,
+          config: config,
+          is_active: true
+        });
 
       if (error) throw error;
 
@@ -64,7 +65,7 @@ const IntegrationForm = ({ onIntegrationCreated, onCancel }: IntegrationFormProp
       toast({
         variant: "destructive",
         title: "Ошибка",
-        description: "Не удалось создать интеграцию. Функция будет доступна после настройки базы данных.",
+        description: "Не удалось создать интеграцию",
       });
     } finally {
       setIsLoading(false);
