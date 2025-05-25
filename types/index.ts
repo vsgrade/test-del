@@ -1,4 +1,3 @@
-
 export type TicketStatus = 'new' | 'open' | 'in_progress' | 'waiting_customer' | 'waiting_internal' | 'resolved' | 'closed' | 'reopened';
 export type TicketPriority = 'low' | 'medium' | 'high' | 'critical';
 export type TicketChannel = 'web' | 'email' | 'phone' | 'telegram' | 'whatsapp' | 'vk';
@@ -98,6 +97,7 @@ export interface UpdateTicketData {
   due_date?: string;
   resolved_at?: string;
   closed_at?: string;
+  updated_at?: string;
 }
 
 export interface TicketComment {
